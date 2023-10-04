@@ -1,0 +1,15 @@
+version: 2.1
+
+jobs:
+  test:
+    parallelism: 3
+    docker:
+      - image: openstax/python3-chrome-base
+    steps:
+      - checkout
+      - run: npx pwc --key $CURRENTS_RECORD_KEY --project-id $CURRENTS_PROJECT_ID
+workflows:
+  playwright:
+    jobs:
+      - test:
+          context: currents
