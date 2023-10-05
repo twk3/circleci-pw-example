@@ -1,50 +1,21 @@
 version: 2.1
-
-aliases:
-  - &cache_restore
-    restore_cache:
-      keys:
-        - v2-dependencies-{{ checksum "yarn.lock" }}
-
-  - &cache_save
-    save_cache:
-      paths:
-        - node_modules
-        - ~/.cache/yarn
-      key: v2-dependencies-{{ checksum "yarn.lock" }}
-
-  - &install_dependencies
-    run: yarn install --frozen-lockfile --cache-folder ~/.cache/yarn
-
 jobs:
-  playwright-run:
-    executor: plugin-e2e-tester
-    parallelism: 1
+  run-test:
+    docker:
+      - image: mcr.microsoft.com/playwright:v1.23.1-focal
+    # Steps to the job
     steps:
       - checkout
-      - *cache_restore
-      - *install_dependencies
-      - *cache_save
-
+      - run: npm i -D @playwright/test
+      - run: npx playwright install
+      - run: npx playwright install chrome
       - run:
-          name: Install playwright
-          command: |
-            npx playwright install --with-deps chromium
-
-      - run:
-          name: Run E2E tests
-          command: |
-            yarn pwc --key $CURRENTS_RECORD_KEY --project-id $CURRENTS_PROJECT_ID
-
+          name: Run test
+          command: PLAYWRIGHT_JUNIT_OUTPUT_NAME=results.xml npx pwc --key $CURRENTS_RECORD_KEY --project-id $CURRENTS_PROJECT_ID
       - store_test_results:
-          path: ~/repo/apps/plugin/e2e/reports/junit
-
-      - store_artifacts:
-          path: ~/repo/apps/plugin/e2e/recordings
-          destination: artifacts
-
+          path: results.xml
+# Invoke jobs via workflows
 workflows:
-  version: 2
-  all:
+  run-test-workflow:
     jobs:
-      - playwright-run
+      - run-test
