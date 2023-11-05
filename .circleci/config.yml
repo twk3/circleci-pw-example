@@ -2,7 +2,7 @@ version: 2.1
 jobs:
   run-test:
     docker:
-      - image: mcr.microsoft.com/playwright:v1.23.1-focal
+      - image: mcr.microsoft.com/playwright:latest
     # Steps to the job
     steps:
       - checkout
@@ -10,10 +10,9 @@ jobs:
       - run: npx playwright install
       - run: npx playwright install chrome
       - run:
-          name: Run test
-          command: PLAYWRIGHT_JUNIT_OUTPUT_NAME=results.xml npx pwc --key $CURRENTS_RECORD_KEY --project-id $CURRENTS_PROJECT_ID
-      - store_test_results:
-          path: results.xml
+          name: Run tests
+          command: npx pwc --key $CURRENTS_RECORD_KEY --project-id $CURRENTS_PROJECT_ID
+
 # Invoke jobs via workflows
 workflows:
   run-test-workflow:
