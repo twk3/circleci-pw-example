@@ -3,7 +3,6 @@ jobs:
   run-test:
     docker:
       - image: mcr.microsoft.com/playwright:latest
-    # Steps to the job
     parallelism: 3
     steps:
       - checkout
