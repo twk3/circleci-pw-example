@@ -16,11 +16,8 @@ jobs:
     parallelism: 3
     environment:
       PLAYWRIGHT_JUNIT_OUTPUT_NAME: results.xml
-      CURRENTS_DISCOVERY_LAST_RUN: test-results/.last-run.json
     steps:
       - checkout
-      - restore_cache:
-          key: shard-last-retry-{{ .Environment.CIRCLE_WORKFLOW_WORKSPACE_ID }}-{{ .Environment.CIRCLE_NODE_INDEX }}
       - run: npm ci
       - run: npx playwright install
       - run:
@@ -30,19 +27,12 @@ jobs:
             SHARD="$((${CIRCLE_NODE_INDEX}+1))/$CIRCLE_NODE_TOTAL"
             if [ "<<pipeline.parameters.lastFailed>>" == "yes" ] || ([ "<<pipeline.parameters.lastFailed>>" == "onretry" ] && [ -n "${IS_RETRY}" ]); then
               if [ -n "${IS_RETRY}" ]; then
-                SHARD="1/1"
                 EXTRA_CURRENTS_CLI_FLAGS="--tag shard:$CIRCLE_WORKFLOW_WORKSPACE_ID"
-                export CURRENTS_DISCOVERY_LAST_RUN=.currents-last-run.json
               fi
-              # npx currents get-run --failed --project=example  --branch=$CI_COMMIT_REF_NAME --provider="pw" $EXTRA_CURRENTS_CLI_FLAGS > $CURRENTS_DISCOVERY_LAST_RUN
+              # npx currents get-run --failed --project=example  --branch=$CI_COMMIT_REF_NAME --provider="pw" $EXTRA_CURRENTS_CLI_FLAGS > test-results/.last-run.json
               export EXTRA_PW_FLAGS="--last-failed"
             fi
             npx pwc --key $CURRENTS_RECORD_KEY --project-id 0biWxT  --tag "shard:$CIRCLE_WORKFLOW_WORKSPACE_ID" --ci-build-id=shard-$CIRCLE_WORKFLOW_ID --reporter=junit --shard=$SHARD $EXTRA_PW_FLAGS
-      - save_cache:
-          key: shard-last-retry-{{ .Environment.CIRCLE_WORKFLOW_WORKSPACE_ID }}-{{ .Environment.CIRCLE_NODE_INDEX }}
-          when: always
-          paths:
-            - test-results/.last-run.json
       - store_test_results:
           path: results.xml
 
