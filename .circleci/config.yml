@@ -26,7 +26,7 @@ jobs:
       - run:
           name: Run tests
           command: |
-            if [ "$CIRCLE_WORKFLOW_WORKSPACE_ID" != "$CIRCLE_WORKSPACE_ID" ]; then export IS_RETRY="true"; fi
+            if [ "${$CIRCLE_WORKFLOW_WORKSPACE_ID}" != "${CIRCLE_WORKFLOW_ID}" ]; then export IS_RETRY="true"; fi
             SHARD="$((${CIRCLE_NODE_INDEX}+1))/$CIRCLE_NODE_TOTAL"
             if [ "<<pipeline.parameters.lastFailed>>" == "yes" ] || ([ "<<pipeline.parameters.lastFailed>>" == "onretry" ] && [ -n "${IS_RETRY}" ]); then
               if [ -n "${IS_RETRY}" ]; then
@@ -73,9 +73,7 @@ jobs:
       - run:
           name: Run tests
           command: |
-            echo $CIRCLE_WORKFLOW_WORKSPACE_ID
-            echo $CIRCLE_WORKSPACE_ID
-            if [ "$CIRCLE_WORKFLOW_WORKSPACE_ID" != "$CIRCLE_WORKSPACE_ID" ]; then export IS_RETRY="true"; fi
+            if [ "${CIRCLE_WORKFLOW_WORKSPACE_ID}" != "${CIRCLE_WORKFLOW_ID}" ]; then export IS_RETRY="true"; fi
             if [ "<<pipeline.parameters.lastFailed>>" == "yes" ] || ([ "<<pipeline.parameters.lastFailed>>" == "onretry" ] && [ -n "${IS_RETRY}" ]); then
               if [ -n "${IS_RETRY}" ]; then
                 EXTRA_CURRENTS_CLI_FLAGS="--tag or8n:$CIRCLE_WORKFLOW_WORKSPACE_ID"
