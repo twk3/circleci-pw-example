@@ -39,7 +39,7 @@ jobs:
             fi
             npx pwc --key $CURRENTS_RECORD_KEY --project-id 0biWxT  --tag "shard:$CIRCLE_WORKFLOW_WORKSPACE_ID" --ci-build-id=shard-$CIRCLE_WORKFLOW_ID --reporter=junit --shard=$SHARD $EXTRA_PW_FLAGS
       - save_cache:
-          key: shard-last-retry-{{ .Environment.CIRCLE_WORKFLOW_WORKSPACE_ID }}
+          key: shard-last-retry-{{ .Environment.CIRCLE_WORKFLOW_WORKSPACE_ID }}-{{ .Environment.CIRCLE_NODE_INDEX }}
           when: always
           paths:
             - test-results/.last-run.json
