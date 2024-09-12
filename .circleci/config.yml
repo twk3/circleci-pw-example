@@ -26,7 +26,7 @@ jobs:
       - run:
           name: Run tests
           command: |
-            if [ "${$CIRCLE_WORKFLOW_WORKSPACE_ID}" != "${CIRCLE_WORKFLOW_ID}" ]; then export IS_RETRY="true"; fi
+            if [ "${CIRCLE_WORKFLOW_WORKSPACE_ID}" != "${CIRCLE_WORKFLOW_ID}" ]; then export IS_RETRY="true"; fi
             SHARD="$((${CIRCLE_NODE_INDEX}+1))/$CIRCLE_NODE_TOTAL"
             if [ "<<pipeline.parameters.lastFailed>>" == "yes" ] || ([ "<<pipeline.parameters.lastFailed>>" == "onretry" ] && [ -n "${IS_RETRY}" ]); then
               if [ -n "${IS_RETRY}" ]; then
@@ -81,7 +81,7 @@ jobs:
               # npx currents get-run --failed --project=example  --branch=$CI_COMMIT_REF_NAME --provider="pw" > test-results/.last-run.json
               export EXTRA_PW_FLAGS="--last-failed"
             fi
-            npx pwc-p --key $CURRENTS_RECORD_KEY --project-id 0biWxT --tag "or8n:$CIRCLE_WORKFLOW_WORKSPACE_ID" --reporter=junit --ci-build-id=or8n-$CIRCLE_WORKFLOW_ID $EXTRA_PW_FLAGS
+            npx pwc-p --key $CURRENTS_RECORD_KEY --project-id 0biWxT --tag "or8n:$CIRCLE_WORKFLOW_WORKSPACE_ID" --ci-build-id=or8n-$CIRCLE_WORKFLOW_ID $EXTRA_PW_FLAGS
 
 # Invoke jobs via workflows
 workflows:
