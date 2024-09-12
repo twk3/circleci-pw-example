@@ -2,7 +2,7 @@ version: 2.1
 jobs:
   run-test:
     docker:
-      - image: mcr.microsoft.com/playwright:1.47
+      - image: mcr.microsoft.com/playwright:v1.47.0
     parallelism: 3
     steps:
       - checkout
