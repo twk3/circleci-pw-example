@@ -12,7 +12,23 @@ jobs:
       - run: npx playwright install
       - run:
           name: Run tests
-          command: SHARD="$((${CIRCLE_NODE_INDEX}+1))"; TESTFILES=$(circleci tests glob "tests/*.spec.ts"); echo "$TESTFILES" | circleci tests run --command="xargs npx pwc --key $CURRENTS_RECORD_KEY --project-id 0biWxT --ci-build-id=shard-$CIRCLE_WORKFLOW_ID --reporter=junit"
+          command: SHARD="$((${CIRCLE_NODE_INDEX}+1))"; npx pwc --key $CURRENTS_RECORD_KEY --project-id 0biWxT --ci-build-id=shard-$CIRCLE_WORKFLOW_ID --reporter=junit --shard=$SHARD/$CIRCLE_NODE_TOTAL
+      - store_test_results:
+          path: results.xml
+
+  circle-run-test:
+    docker:
+      - image: mcr.microsoft.com/playwright:v1.47.0
+    parallelism: 3
+    environment:
+      PLAYWRIGHT_JUNIT_OUTPUT_NAME: results.xml
+    steps:
+      - checkout
+      - run: npm ci
+      - run: npx playwright install
+      - run:
+          name: Run tests
+          command: SHARD="$((${CIRCLE_NODE_INDEX}+1))"; TESTFILES=$(circleci tests glob "tests/*.spec.ts"); echo "$TESTFILES" | circleci tests run --command="xargs npx pwc --key $CURRENTS_RECORD_KEY --project-id 0biWxT --ci-build-id=circle-$CIRCLE_WORKFLOW_ID --reporter=junit"
       - store_test_results:
           path: results.xml
 
@@ -37,6 +53,8 @@ workflows:
   run-test-workflow:
     jobs:
       - shard-run-test:
+          context: currents
+      - circle-run-test:
           context: currents
       - or8n-run-test:
           context: currents
