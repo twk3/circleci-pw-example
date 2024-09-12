@@ -73,6 +73,8 @@ jobs:
       - run:
           name: Run tests
           command: |
+            echo $CIRCLE_WORKFLOW_WORKSPACE_ID
+            echo $CIRCLE_WORKSPACE_ID
             if [ "$CIRCLE_WORKFLOW_WORKSPACE_ID" != "$CIRCLE_WORKSPACE_ID" ]; then export IS_RETRY="true"; fi
             if [ "<<pipeline.parameters.lastFailed>>" == "yes" ] || ([ "<<pipeline.parameters.lastFailed>>" == "onretry" ] && [ -n "${IS_RETRY}" ]); then
               if [ -n "${IS_RETRY}" ]; then
