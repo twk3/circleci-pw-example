@@ -18,13 +18,13 @@ jobs:
       PLAYWRIGHT_JUNIT_OUTPUT_NAME: results.xml
       CURRENTS_DISCOVERY_LAST_RUN: test-results/.last-run.json
     steps:
-      - run: if [ "${CIRCLE_WORKFLOW_WORKSPACE_ID}" != "${CIRCLE_WORKSPACE_ID}" ]; then export IS_RETRY="true"; fi
       - checkout
       - run: npm ci
       - run: npx playwright install
       - run:
           name: Run tests
           command: |
+            if [ "${CIRCLE_WORKFLOW_WORKSPACE_ID}" != "${CIRCLE_WORKSPACE_ID}" ]; then export IS_RETRY="true"; fi
             SHARD="$((${CIRCLE_NODE_INDEX}+1))/$CIRCLE_NODE_TOTAL"
             if [ "<<pipeline.parameters.lastFailed>>" == "yes" ] || ([ "<<pipeline.parameters.lastFailed>>" == "onretry" ] && [ -n "${IS_RETRY}" ]); then
               if [ -n "${IS_RETRY}" ]; then
@@ -60,13 +60,13 @@ jobs:
       - image: mcr.microsoft.com/playwright:v1.47.0
     parallelism: 3
     steps:
-      - run: if [ "${CIRCLE_WORKFLOW_WORKSPACE_ID}" != "${CIRCLE_WORKSPACE_ID}" ]; then export IS_RETRY="true"; fi
       - checkout
       - run: npm ci
       - run: npx playwright install
       - run:
           name: Run tests
           command: |
+            if [ "${CIRCLE_WORKFLOW_WORKSPACE_ID}" != "${CIRCLE_WORKSPACE_ID}" ]; then export IS_RETRY="true"; fi
             if [ "<<pipeline.parameters.lastFailed>>" == "yes" ] || ([ "<<pipeline.parameters.lastFailed>>" == "onretry" ] && [ -n "${IS_RETRY}" ]); then
               if [ -n "${IS_RETRY}" ]; then
                 EXTRA_CURRENTS_CLI_FLAGS="--tag or8n:$CIRCLE_WORKFLOW_WORKSPACE_ID"
