@@ -20,7 +20,7 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          key: shard-last-retry-{{ .Environment.CIRCLE_WORKFLOW_WORKSPACE_ID }}
+          key: shard-last-retry-{{ .Environment.CIRCLE_WORKFLOW_WORKSPACE_ID }}-{{ .Environment.CIRCLE_NODE_INDEX }}
       - run: npm ci
       - run: npx playwright install
       - run:
