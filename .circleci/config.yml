@@ -12,7 +12,7 @@ jobs:
       - run: npx playwright install
       - run:
           name: Run tests
-          command: SHARD="$((${CIRCLE_NODE_INDEX}+1))"; npx pwc --key $CURRENTS_RECORD_KEY --project-id 0biWxT --ci-build-id=shard-$CIRCLE_WORKFLOW_ID --reporter=junit --shard=${SHARD}/${CIRCLE_NODE_TOTAL}
+          command: SHARD="$((${CIRCLE_NODE_INDEX}+1))"; circleci tests run --command="xargs npx pwc --key $CURRENTS_RECORD_KEY --project-id 0biWxT --ci-build-id=shard-$CIRCLE_WORKFLOW_ID --reporter=junit --shard=${SHARD}/${CIRCLE_NODE_TOTAL}"
       - store_test_results:
           path: results.xml
 
@@ -28,7 +28,7 @@ jobs:
       - run: npx playwright install
       - run:
           name: Run tests
-          command: SHARD="$((${CIRCLE_NODE_INDEX}+1))"; npx pwc-p --key $CURRENTS_RECORD_KEY --project-id 0biWxT --reporter=junit --ci-build-id=or8n-$CIRCLE_WORKFLOW_ID
+          command: SHARD="$((${CIRCLE_NODE_INDEX}+1))"; circleci tests run --command="xargs npx pwc-p --key $CURRENTS_RECORD_KEY --project-id 0biWxT --reporter=junit --ci-build-id=or8n-$CIRCLE_WORKFLOW_ID"
       - store_test_results:
           path: results.xml
 
