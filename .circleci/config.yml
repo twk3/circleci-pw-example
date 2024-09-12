@@ -1,6 +1,6 @@
 version: 2.1
 jobs:
-  run-test:
+  shard-run-test:
     docker:
       - image: mcr.microsoft.com/playwright:v1.47.0
     parallelism: 3
@@ -10,11 +10,25 @@ jobs:
       - run: npx playwright install
       - run:
           name: Run tests
-          command: SHARD="$((${CIRCLE_NODE_INDEX}+1))"; npx pwc --key $CURRENTS_RECORD_KEY --project-id 0biWxT --shard=${SHARD}/${CIRCLE_NODE_TOTAL}
+          command: SHARD="$((${CIRCLE_NODE_INDEX}+1))"; npx pwc --key $CURRENTS_RECORD_KEY --project-id 0biWxT --ci-build-id=shard-$CIRCLE_WORKFLOW_ID --shard=${SHARD}/${CIRCLE_NODE_TOTAL}
+
+  or8n-run-test:
+    docker:
+      - image: mcr.microsoft.com/playwright:v1.47.0
+    parallelism: 3
+    steps:
+      - checkout
+      - run: npm ci
+      - run: npx playwright install
+      - run:
+          name: Run tests
+          command: SHARD="$((${CIRCLE_NODE_INDEX}+1))"; npx pwc-p --key $CURRENTS_RECORD_KEY --project-id 0biWxT --ci-build-id=or8n-$CIRCLE_WORKFLOW_ID
 
 # Invoke jobs via workflows
 workflows:
   run-test-workflow:
     jobs:
-      - run-test:
+      - shard-run-test:
+          context: currents
+      - or8n-run-test:
           context: currents
