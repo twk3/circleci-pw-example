@@ -25,7 +25,7 @@ jobs:
           name: Run tests
           command: |
             echo $CIRCLE_JOB-$CIRCLE_WORKFLOW_WORKSPACE_ID-$CIRCLE_NODE_INDEX
-            SHARD="$((${CIRCLE_NODE_INDEX}+1))"
+            SHARD="$((${CIRCLE_NODE_INDEX}+1))/${CIRCLE_NODE_TOTAL}"
             npx pwc --key $CURRENTS_RECORD_KEY --shard=${SHARD}
       - run:
           when: always
