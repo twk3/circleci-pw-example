@@ -47,7 +47,7 @@ jobs:
           name: Run tests
           command: |
             if [ "${CIRCLE_WORKFLOW_WORKSPACE_ID}" != "${CIRCLE_WORKFLOW_ID}" ]; then
-              npx currents api get-run --key $CURRENTS_API_KEY --branch=$CI_COMMIT_REF_NAME --pw-last-run --output=test-results/.last-run.json || true
+              npx currents api get-run --key $CURRENTS_API_KEY --branch=$CIRCLE_BRANCH --pw-last-run --output=test-results/.last-run.json || true
               export EXTRA_PW_FLAGS="--last-failed"
             fi
             npx pwc-p --key $CURRENTS_RECORD_KEY --ci-build-id=or8n-$CIRCLE_WORKFLOW_ID $EXTRA_PW_FLAGS
