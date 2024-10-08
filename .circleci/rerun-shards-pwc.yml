@@ -1,14 +1,5 @@
 version: 2.1
 
-parameters:
-  lastFailed:
-    type: enum
-    default: 'onretry'
-    enum:
-      - 'onretry'
-      - 'yes'
-      - 'no'
-
 jobs:
   shard-run-test:
     docker:
