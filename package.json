@@ -13,6 +13,7 @@
     "typescript": "^5.0.2"
   },
   "devDependencies": {
+    "@currents/cmd": "^1.1.2",
     "@currents/playwright": "^1.5.11",
     "@playwright/test": "^1.47.0",
     "@types/node": "^20.8.2"
