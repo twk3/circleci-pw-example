@@ -24,33 +24,21 @@ jobs:
       - run:
           name: Run tests
           command: |
-            echo $CIRCLE_JOB-$CIRCLE_WORKFLOW_WORKSPACE_ID-$CIRCLE_NODE_INDEX
+            if [ "${CIRCLE_WORKFLOW_WORKSPACE_ID}" != "${CIRCLE_WORKFLOW_ID}" ]; then
+              export EXTRA_PW_FLAGS="--last-failed"
+            fi
             SHARD="$((${CIRCLE_NODE_INDEX}+1))/${CIRCLE_NODE_TOTAL}"
-            npx pwc --key $CURRENTS_RECORD_KEY --shard=${SHARD}
+            npx pwc --key $CURRENTS_RECORD_KEY --shard=${SHARD} $EXTRA_PW_FLAGS
       - run:
           when: always
           command: npx currents cache set --preset last-run --id $CIRCLE_JOB-$CIRCLE_WORKFLOW_WORKSPACE_ID-$CIRCLE_NODE_INDEX
-
-  circle-run-test:
-    docker:
-      - image: mcr.microsoft.com/playwright:v1.47.0
-    parallelism: 3
-    environment:
-      PLAYWRIGHT_JUNIT_OUTPUT_NAME: results.xml
-    steps:
-      - checkout
-      - run: npm ci
-      - run: npx playwright install
-      - run:
-          name: Run tests
-          command: SHARD="$((${CIRCLE_NODE_INDEX}+1))"; TESTFILES=$(circleci tests glob "tests/*.spec.ts"); echo "$TESTFILES" | circleci tests run --command="xargs npx pwc --key $CURRENTS_RECORD_KEY --project-id 0biWxT --ci-build-id=circle-$CIRCLE_WORKFLOW_ID --reporter=junit"
-      - store_test_results:
-          path: results.xml
 
   or8n-run-test:
     docker:
       - image: mcr.microsoft.com/playwright:v1.47.0
     parallelism: 3
+    environment:
+      CURRENTS_PROJECT_ID: 0biWxT
     steps:
       - checkout
       - run: npm ci
@@ -58,15 +46,11 @@ jobs:
       - run:
           name: Run tests
           command: |
-            if [ "${CIRCLE_WORKFLOW_WORKSPACE_ID}" != "${CIRCLE_WORKFLOW_ID}" ]; then export IS_RETRY="true"; fi
-            if [ "<<pipeline.parameters.lastFailed>>" == "yes" ] || ([ "<<pipeline.parameters.lastFailed>>" == "onretry" ] && [ -n "${IS_RETRY}" ]); then
-              if [ -n "${IS_RETRY}" ]; then
-                EXTRA_CURRENTS_CLI_FLAGS="--tag or8n:$CIRCLE_WORKFLOW_WORKSPACE_ID"
-              fi
-              # npx currents get-run --failed --project=example  --branch=$CI_COMMIT_REF_NAME --provider="pw" > test-results/.last-run.json
+            if [ "${CIRCLE_WORKFLOW_WORKSPACE_ID}" != "${CIRCLE_WORKFLOW_ID}" ]; then
+              npx currents api get-run --key $CURRENTS_API_KEY --branch=$CI_COMMIT_REF_NAME --pw-last-run --output=test-results/.last-run.json || true
               export EXTRA_PW_FLAGS="--last-failed"
             fi
-            npx pwc-p --key $CURRENTS_RECORD_KEY --project-id 0biWxT --tag "or8n:$CIRCLE_WORKFLOW_WORKSPACE_ID" --ci-build-id=or8n-$CIRCLE_WORKFLOW_ID $EXTRA_PW_FLAGS
+            npx pwc-p --key $CURRENTS_RECORD_KEY --ci-build-id=or8n-$CIRCLE_WORKFLOW_ID $EXTRA_PW_FLAGS
 
 # Invoke jobs via workflows
 workflows:
@@ -74,7 +58,5 @@ workflows:
     jobs:
       - shard-run-test:
           context: currents
-      # - circle-run-test:
-      #     context: currents
-      # - or8n-run-test:
-      #     context: currents
+      - or8n-run-test:
+          context: currents
