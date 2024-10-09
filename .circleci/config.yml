@@ -1,21 +1,59 @@
 version: 2.1
+
+parameters:
+  lastFailed:
+    type: enum
+    default: 'onretry'
+    enum:
+      - 'onretry'
+      - 'yes'
+      - 'no'
+
 jobs:
-  run-test:
+  shard-run-test:
     docker:
-      - image: mcr.microsoft.com/playwright:latest
+      - image: mcr.microsoft.com/playwright:v1.47.0
     parallelism: 3
+    environment:
+      CURRENTS_PROJECT_ID: 0biWxT
     steps:
       - checkout
-      - run: npm i -D @playwright/test
+      - run: npm ci
       - run: npx playwright install
-      - run: npx playwright install chrome
+      - run: npx currents cache get --preset last-run --id $CIRCLE_JOB-$CIRCLE_WORKFLOW_WORKSPACE_ID-$CIRCLE_NODE_INDEX --continue
       - run:
           name: Run tests
-          command: SHARD="$((${CIRCLE_NODE_INDEX}+1))"; npx pwc --key $CURRENTS_RECORD_KEY --project-id bnsqNa --shard=${SHARD}/${CIRCLE_NODE_TOTAL}
+          command: |
+            EXTRA_PW_FLAGS="$(cat .currents_env)"
+            npx pwc --key $CURRENTS_RECORD_KEY $EXTRA_PW_FLAGS
+      - run:
+          when: always
+          command: npx currents cache set --preset last-run --id $CIRCLE_JOB-$CIRCLE_WORKFLOW_WORKSPACE_ID-$CIRCLE_NODE_INDEX
+
+  or8n-run-test:
+    docker:
+      - image: mcr.microsoft.com/playwright:v1.47.0
+    parallelism: 3
+    environment:
+      CURRENTS_PROJECT_ID: 0biWxT
+    steps:
+      - checkout
+      - run: npm ci
+      - run: npx playwright install
+      - run:
+          name: Run tests
+          command: |
+            if [ "${CIRCLE_WORKFLOW_WORKSPACE_ID}" != "${CIRCLE_WORKFLOW_ID}" ]; then
+              npx currents api get-run --key $CURRENTS_API_KEY --branch=$CIRCLE_BRANCH --pw-last-run --output=test-results/.last-run.json || true
+              export EXTRA_PW_FLAGS="--last-failed"
+            fi
+            npx pwc-p --key $CURRENTS_RECORD_KEY --ci-build-id=or8n-$CIRCLE_WORKFLOW_ID $EXTRA_PW_FLAGS
 
 # Invoke jobs via workflows
 workflows:
   run-test-workflow:
     jobs:
-      - run-test:
+      - shard-run-test:
+          context: currents
+      - or8n-run-test:
           context: currents
