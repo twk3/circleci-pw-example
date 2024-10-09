@@ -24,11 +24,8 @@ jobs:
       - run:
           name: Run tests
           command: |
-            if [ "${CIRCLE_WORKFLOW_WORKSPACE_ID}" != "${CIRCLE_WORKFLOW_ID}" ]; then
-              export EXTRA_PW_FLAGS="--last-failed --shard=1/1"
-            fi
-            SHARD="$((${CIRCLE_NODE_INDEX}+1))/${CIRCLE_NODE_TOTAL}"
-            npx pwc --key $CURRENTS_RECORD_KEY --shard=${SHARD} $EXTRA_PW_FLAGS
+            EXTRA_PW_FLAGS="$(cat .currents_env)"
+            npx pwc --key $CURRENTS_RECORD_KEY $EXTRA_PW_FLAGS
       - run:
           when: always
           command: npx currents cache set --preset last-run --id $CIRCLE_JOB-$CIRCLE_WORKFLOW_WORKSPACE_ID-$CIRCLE_NODE_INDEX
